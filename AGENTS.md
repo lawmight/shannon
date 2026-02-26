@@ -11,6 +11,7 @@ Shannon is an AI-powered penetration testing framework using TypeScript, Tempora
 | **Temporal Server** | `docker compose up temporal -d` | Required. Exposes gRPC on `:7233`, Web UI on `:8233` |
 | **Worker** (local dev) | `node dist/temporal/worker.js` | Connects to `localhost:7233` by default. Set `TEMPORAL_ADDRESS` to override |
 | **Client** | `node dist/temporal/client.js <url> <repoPath> [options]` | Submits workflow to Temporal |
+| **Router** (optional) | `docker compose --profile router up router -d` | Multi-model proxy on `:3456`. Required when using `ROUTER=true` with OpenRouter/OpenAI keys |
 
 ### Build
 
@@ -34,10 +35,15 @@ Docker must be installed and configured before Temporal can run. Key gotchas:
 
 ### Running a Pipeline
 
-Requires `ANTHROPIC_API_KEY` (or `CLAUDE_CODE_OAUTH_TOKEN`) in `.env`. The full Docker-based workflow is:
+Supports two auth modes (see `.env.example`):
+1. **Direct Anthropic**: Set `ANTHROPIC_API_KEY` in `.env`
+2. **Router mode**: Set `OPENROUTER_API_KEY` (or `OPENAI_API_KEY`) + `ROUTER_DEFAULT` in `.env`, then pass `ROUTER=true` to the CLI
+
+The full Docker-based workflow is:
 
 ```
-./shannon start URL=<url> REPO=<repo-name>
+./shannon start URL=<url> REPO=<repo-name>                # Direct Anthropic
+./shannon start URL=<url> REPO=<repo-name> ROUTER=true     # Router mode (OpenRouter/OpenAI)
 ```
 
 For local development (worker outside Docker), start Temporal via Docker Compose and run the worker directly with Node.js. The `.env` file is loaded automatically via `dotenv`.
